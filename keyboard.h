@@ -117,6 +117,8 @@ struct Keyevent {
 
 struct Keyevent prevent = { (enum Scancodes) 0x00, false };
 
+bool pressedKeys[128];
+
 struct Keyevent getKeyevent() {
 	byte scancode = getscancode();
 	bool pressed = true;
@@ -126,17 +128,12 @@ struct Keyevent getKeyevent() {
 	}
 	struct Keyevent keyevent = { (enum Scancodes) scancode, pressed };
 	prevent = keyevent;
+
+        byte index = (byte) keyevent.key;
+        if (keyevent.pressed) pressedKeys[index] = true;
+        else pressedKeys[index] = false;
+	
 	return keyevent;
-}
-
-bool pressedKeys[128];
-
-struct Keyevent processKeys() {
-	struct Keyevent event = getKeyevent();
-	byte index = (byte) event.key;
-	if (event.pressed) pressedKeys[index] = true;
-	else pressedKeys[index] = false;
-	return event;
 }
 
 bool isKeyPressed(enum Scancodes key) {
@@ -337,9 +334,14 @@ struct instringbit inputstring(struct buffer* buf, char delimiter) {
 	if (event.pressed == false) return ret;
 	if (event.key == previous.key && previous.pressed) return ret;
 	char c = toAscii(event.key);
-	if (c == delimiter) {
+	if (c == 0x00) return ret;
+	else if (c == delimiter) {
 		ret.done = true;
 		return ret;
+	}
+	else if (c == '\b') {
+		bufpop(buf);
+		if (buf->error) return ret;
 	}
 	else bufpush(c,buf);
 	ret.changed = true;

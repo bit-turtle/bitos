@@ -10,8 +10,14 @@
 
 .globl start
 .extern kernel
+.extern getidt
+.extern getgdt
 
 start:
-	cli	# Remove interrupts
+	cli	# Disable interrupts
+	call getgdt	# Get Pointer To Global Descriptor Table
+	lgdt (%eax)	# Load Global Descriptor Table
+	call getidt	# Get Pointer To Interrupt Descriptor Table
+	lidt (%eax)	# Load Interrupt Descriptor Table
 	call kernel	# Call Kernel defined in kernel.c
-	hlt	# Stop CPU if Kernel ends
+	hlt		# Halt CPU after Kernel is Done

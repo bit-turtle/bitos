@@ -57,13 +57,13 @@ void print(char* string) {
 			cursory++;
 			cursorx = 0;
 		}
-		else if (*string == '\r') cursorx=0;	// Carriage Return
+		else if (*string == '\r') cursorx = 0;	// Carriage Return
 		else if (*string == '\b') {	// Backspace
-      if (cursorx == 0 && cursory != 0) {
-        cursorx = VGA_WIDTH;
-        cursory--;
-      }
-      else cursorx--;
+			if (cursorx == 0 && cursory != 0) {
+				cursorx = VGA_WIDTH-1;
+				cursory--;
+			}
+			else cursorx--;
 			wchar('\0',cursorx,cursory);
 		}
 		else if (*string == '\t') {	// Tab
@@ -82,8 +82,9 @@ void print(char* string) {
 			cursory = VGA_HEIGHT;
 			scrollup();
 		}
-    if (cursorx < 0) cursorx = 0;
-    if (cursory < 0) cursory = 0;
+		
+		if (cursorx < 0) cursorx = 0;
+		if (cursory < 0) cursory = 0;
 
 		string++;
 	}
