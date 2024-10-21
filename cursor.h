@@ -6,6 +6,9 @@
 #include "io.h"
 #include "vga.h"
 
+#ifndef CURSOR_H
+#define CURSOR_H
+
 byte cursorx = 0;
 byte cursory = 0;
 
@@ -34,3 +37,5 @@ void update_cursor_position() {
 	outb(0x3D4, 0x0E);
 	outb(0x3D5, (byte) ((pos >> 8) & 0xFF));
 }
+
+#endif

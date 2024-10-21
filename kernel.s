@@ -2,22 +2,22 @@
 .code32
 
 .section .text
-	# Multiboot
+multiboot2_start:
+	# Multiboot 2
 	.align 4
-	.long 0x1badb002	# The magic GRUB number
-	.long 0x00	# Flags
-	.long - (0x1badb002 + 0x00) # Checksum (magic + flags - checksum) = 0
+	.long 0xe85250d6		# Multiboot magic
+	.long 0x00			# Architecture
+	.long (multiboot2_end - multiboot2_start)			# Header Length
+	.long - (0xe85250d6 + 0x00 + (multiboot2_end - multiboot2_start))	# Checksum (magic + architecture + length + checksum) = 0
+multiboot2_end:
+
+multiboot2_return:
+	.skip 4 * 13
 
 .globl start
 .extern kernel
-.extern getidt
-.extern getgdt
 
 start:
-	cli	# Disable interrupts
-	call getgdt	# Get Pointer To Global Descriptor Table
-	lgdt (%eax)	# Load Global Descriptor Table
-	call getidt	# Get Pointer To Interrupt Descriptor Table
-	lidt (%eax)	# Load Interrupt Descriptor Table
+	cli		# Disable Interrupts
 	call kernel	# Call Kernel defined in kernel.c
 	hlt		# Halt CPU after Kernel is Done

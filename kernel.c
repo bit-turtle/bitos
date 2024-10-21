@@ -1,7 +1,6 @@
 // Main Kernel File (kernel.c)
 
 #include "vga.h"
-#include "interrupt.h"
 #include "type.h"
 #include "terminal.h"
 #include "keyboard.h"

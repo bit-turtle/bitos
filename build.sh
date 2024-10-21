@@ -37,6 +37,6 @@ echo "Creating ISO..."
 checkpkg "grub-mkrescue"
 checkpkg "xorriso"
 checkpkg "mformat"
-cp kernel.bin ./iso/boot/kernel.bin
+cp kernel.bin ./iso/boot/bitos.bin
 grub-mkrescue -o bitos.iso ./iso
 echo "Done!"
