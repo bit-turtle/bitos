@@ -320,7 +320,12 @@ char toAscii(enum Scancodes scancode) {
 			return '\0';
 	}
 }
-
+// Key repeat variables
+unsigned long long repeatinitdelay = 10*1024;
+unsigned long long repeatdelay = 1*1024;
+unsigned long long repeat = 0;
+bool repeated = false;
+// Input String Struct
 struct instringbit {	// Input string return value
 	bool done;	// Delimiter reached
 	bool changed;	// String Changed?
@@ -331,22 +336,59 @@ struct instringbit inputstring(struct buffer* buf, char delimiter) {
 	struct instringbit ret = {false,false,0x00};
 	struct Keyevent previous = prevent;
 	struct Keyevent event = getKeyevent();
-	if (event.pressed == false) return ret;
-	if (event.key == previous.key && previous.pressed) return ret;
 	char c = toAscii(event.key);
-	if (c == 0x00) return ret;
-	else if (c == delimiter) {
-		ret.done = true;
+
+	// Skip if CTRL,SHIFT,or ALT
+	if (	event.key == LEFTSHIFT || event.key == RIGHTSHIFT ||
+		event.key == CTRL || event.key == ALT 
+	) return ret;
+
+	// Process key boolean
+	bool process = false;
+
+	// Util bools
+	bool samekey = (event.key == previous.key) ? true : false;
+	bool pressed = event.pressed;
+	bool waspressed = previous.pressed;
+
+	// Repeat Counter
+	if (pressed) repeat ++;
+	else {
+		repeat = 0;
+		repeated = false;
+	}
+	// Key repeat
+	if (pressed && !waspressed) process = true;
+	else if (pressed && (
+			(repeated && repeat > repeatdelay) ||
+			(!repeated && repeat > repeatinitdelay)
+	) ) {
+		repeated = true;
+		process = true;
+	}
+
+	if (process) {
+		// Reset key repeat
+		repeat = 0;
+		// Process key event
+		if (c == 0x00) return ret;
+		else if (c == delimiter) {
+			ret.done = true;
+			repeated = false;
+			repeat = 0;
+			return ret;
+		}
+		else if (c == '\b') {
+			bufpop(buf);
+			if (buf->error) return ret;
+		}
+		else bufpush(c,buf);
+		if (buf->error) return ret;
+		ret.changed = true;
+		ret.c = c;
 		return ret;
 	}
-	else if (c == '\b') {
-		bufpop(buf);
-		if (buf->error) return ret;
-	}
-	else bufpush(c,buf);
-	ret.changed = true;
-	ret.c = c;
-	return ret;
+	else return ret;
 }
 
 #endif

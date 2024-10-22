@@ -2,31 +2,19 @@
 
 #include "vga.h"
 #include "type.h"
+#include "cursor.h"
 #include "terminal.h"
 #include "keyboard.h"
 #include "buffer.h"
+#include "shell.h"
 
 extern void kernel() {	//Kernel start
 	clear();
 	move_cursor(0,0);
-	print("Welcome To BitOS! Write Something and Click [Enter]\n");
-	
-	disable_cursor();
+	print("Welcome To Bit OS!\n");
 	move_cursor(0,1);
 	enable_cursor(0,15);
-	struct buffer buf;
-	bufinit(&buf);
-	struct instringbit input;
-	do {
-		input = inputstring(&buf,'\n');
-		if (input.changed) printc(input.c);
-		update_cursor_position();
-	}
-	while (!input.done);
-
-	print("\n\nYou Wrote:\n");
-	print(&buf.data[0]);
-
+	shell();	// Start Shell
 	update_cursor_position();
 }
 

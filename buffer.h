@@ -43,4 +43,8 @@ char bufpop(struct buffer* buf) {
 	return data;
 }
 
+void bufclear(struct buffer* buf) {
+	bufinit(buf);
+}
+
 #endif // !BUFFER_H
