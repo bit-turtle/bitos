@@ -1,3 +1,3 @@
 # TODO
-1. Create Repeating Keys
-2. BASIC Shell
+1. Shutdown system in assembly
+2. More BitOS Shell Features
