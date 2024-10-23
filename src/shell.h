@@ -30,10 +30,10 @@ bool strcmp(char* str1,  char* str2) {
 	return match;
 }
 
-void getword(struct buffer* buf, char* str, unsigned int index) {
+void getword(struct buffer* buf, char* str, unsigned int index, char delim) {
 	unsigned int words = 0;
 	while (*str != 0x00) {
-		if (*str == ' ') words ++;
+		if (*str == delim) words ++;
 		else if (words == index) bufpush(*str, buf);
 		str++;
 	}
@@ -69,6 +69,10 @@ void formatstr(struct buffer* buf, char* str) {
 					case 'n':
 						c = '\n';
 						break;
+					// \r Carriage Return
+					case 'r':
+						c = '\r';
+						break;
 					// Default: Pretend it wasn't escaped (Example: \m = "\m")
 					default:
 						bufpush('\\', buf);
@@ -79,6 +83,96 @@ void formatstr(struct buffer* buf, char* str) {
 		}
 		str++;
 	}
+}
+
+long numstr(char* str) {
+	long number = 0;
+	while (*str != 0x00) {
+		bool good = true;
+		byte digit = 0;
+		switch (*str) {
+			case '0':
+				digit = 0;
+				break;
+			case '1':
+				digit = 1;
+				break;
+			case '2':
+				digit = 2;
+				break;
+			case '3':
+				digit = 3;
+				break;
+			case '4':
+				digit = 4;
+				break;
+			case '5':
+				digit = 5;
+				break;
+			case '6':
+				digit = 6;
+				break;
+			case '7':
+				digit = 7;
+				break;
+			case '8':
+				digit = 8;
+				break;
+			case '9':
+				digit = 9;
+				break;
+			default:
+				print("numstr: Unexpected Character: ");
+				printc(*str);
+				print("\n");
+				good = false;
+		}
+		if (good) {
+			number *= 10;
+			number += digit;
+		}
+		else break;
+	}
+	return number;
+}
+
+bool procshell(struct buffer* line) {
+	bool done = false;
+	struct buffer cmd;
+	bufinit(&cmd);
+	getword(&cmd, line->start, 0, ' ');
+	struct buffer arg;
+	bufinit(&arg);
+	substr(&arg, line->start, strlen(cmd.start));
+	if (strcmp(cmd.start, "reboot")) {	// `reboot`: Reboot the computer
+		print("Rebooting...\n");
+		done = true;	// End shell
+	}
+	else if (strcmp(cmd.start, "clear")) {	// `clear`: Clear Screen
+		clear();
+		move_cursor(0,0);
+	}
+	else if (strcmp(cmd.start, "print")) {	// `print`: Unformatted Print
+		// Print String
+		print(arg.start);
+		// Trailing newline
+		print("\n");
+	}
+	else if (strcmp(cmd.start, "echo")) {	// `echo`: Formatted Print
+		// Format and Print String
+		struct buffer fmt;
+		bufinit(&fmt);
+		formatstr(&fmt, arg.start);
+		print(fmt.start);
+		// Trailing newline
+		print("\n");
+	}
+	else {
+		print("bitsh: Unknown Command: ");
+		print(cmd.start);
+		print("\n");
+	}
+	return done;
 }
 
 void shell() {
@@ -92,39 +186,6 @@ void shell() {
 		print("> ");
 		shellinput(&input);
 		print("\n");
-		struct buffer cmd;
-		bufinit(&cmd);
-		getword(&cmd, &input.data[0], 0);
-		struct buffer arg;
-		bufinit(&arg);
-		substr(&arg, &input.data[0], strlen(&cmd.data[0]));
-		if (strcmp(&cmd.data[0], "reboot")) {
-			print("Rebooting...\n");
-			done = true;
-		}
-		else if (strcmp(&cmd.data[0], "clear")) {
-			clear();	// Clear Screen
-			move_cursor(0,0);
-		}
-		else if (strcmp(&cmd.data[0], "print")) {
-			// Print String
-			print(&arg.data[0]);
-			// Trailing newline
-			print("\n");
-		}
-		else if (strcmp(&cmd.data[0], "echo")) {
-			// Format and Print String
-			struct buffer fmt;
-			bufinit(&fmt);
-			formatstr(&fmt, &arg.data[0]);
-			print(&fmt.data[0]);
-			// Trailing newline
-			print("\n");
-		}
-		else {
-			print("bitsh: Unknown Command: ");
-			print(&cmd.data[0]);
-			print("\n");
-		}
+		done = procshell(&input);
 	}
 }

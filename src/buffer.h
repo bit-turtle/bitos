@@ -7,12 +7,15 @@
 
 #define BUFFER_LENGTH 2048
 struct buffer {
-	char data[BUFFER_LENGTH];
+	char data[BUFFER_LENGTH+1];
+	char* start;
 	void* pointer;
 	bool error;	// Was there an error? (Popping the start or pushing onto the end)
 };
 
 void bufinit(struct buffer* buf) {
+	buf->start = &buf->data[0];
+	buf->data[BUFFER_LENGTH] = 0x00;
 	buf->pointer = &buf->data[0];
 	for (unsigned int i = 0; i < BUFFER_LENGTH; i++) buf->data[i] = 0x00;
 }

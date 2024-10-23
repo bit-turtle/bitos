@@ -17,7 +17,7 @@ multiboot2_return:
 .globl start
 .extern kernel
 
-reboot:
+reboot:	# Reboot using a 8042 Reset
 	mov $0x02, %al	# Loop while good
 reboot_loop:
 	mov %al, %ah

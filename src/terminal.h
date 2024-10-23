@@ -48,6 +48,7 @@ void scrollup() {
 	for (int y = 1; y < VGA_HEIGHT; y++) {
 		for (int x = 0; x < VGA_WIDTH; x++) wchar(gchar(x,y),x,y-1);
 	}
+	clearl(VGA_HEIGHT-1);
 }
 
 void print(char* string) {
@@ -79,7 +80,7 @@ void print(char* string) {
 			cursorx = 0;
 		}
 		if (cursory >= VGA_HEIGHT) {
-			cursory = VGA_HEIGHT;
+			cursory = VGA_HEIGHT-1;
 			scrollup();
 		}
 		
